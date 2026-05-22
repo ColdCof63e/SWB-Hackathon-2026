@@ -1,0 +1,58 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+@theme {
+  --font-sans: 'Outfit', sans-serif;
+}
+
+@utility glass-panel {
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.4);
+}
+
+@utility glass-panel-glow {
+  box-shadow: 0 0 40px -10px rgba(99, 102, 241, 0.15);
+}
+
+@utility hover-glow {
+  &:hover {
+    box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.2), 0 0 15px -5px rgba(99, 102, 241, 0.2);
+    border-color: rgba(168, 85, 247, 0.4);
+  }
+}
+
+body {
+  background-color: #020617; /* bg-slate-950 fallback */
+  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbars for a premium dashboard feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(2, 6, 23, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+/* Circular progress animation */
+@keyframes progress {
+  from {
+    stroke-dashoffset: 283;
+  }
+}
