@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWB Remote Pivot Engine v3.0 - Architecture Design & Product Specification Document</title>
+    <style>
+        :root {
+            --bg-main: #020617;
+            --bg-panel: #0f172a;
+            --border-color: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --indigo-accent: #6366f1;
+            --purple-accent: #a855f7;
+            --rose-accent: #f43f5e;
+            --emerald-accent: #10b981;
+        }
+
+        @page {
+            size: A4;
+            margin: 20mm 15mm;
+
+            @bottom-right {
+                content: counter(page);
+                font-family: system-ui, sans-serif;
+                font-size: 8.5pt;
+                color: var(--text-secondary);
+            }
+
+            @bottom-left {
+                content: "Scale Without Borders AI Hackathon 2026 — Product Specification v3.0";
+                font-family: system-ui, sans-serif;
+                font-size: 8.5pt;
+                color: var(--text-secondary);
+            }
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 10.5pt;
+            line-height: 1.6;
+            color: #cbd5e1;
+            background-color: var(--bg-main);
+            margin: 0;
+            padding: 0;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        .header-banner {
+            padding: 30px;
+            background: linear-gradient(135deg, #090d1a 0%, #111827 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        .header-banner h1 {
+            font-size: 24pt;
+            margin: 0 0 8px 0;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            background: linear-gradient(to right, #ffffff, var(--indigo-accent), var(--purple-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-banner .subtitle {
+            font-size: 12pt;
+            margin: 0 0 20px 0;
+            color: #38bdf8;
+            font-weight: 400;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+            font-size: 9pt;
+            color: var(--text-secondary);
+        }
+
+        h2 {
+            font-size: 14pt;
+            color: var(--text-primary);
+            margin-top: 35px;
+            margin-bottom: 15px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border-color);
+            page-break-after: avoid;
+        }
+
+        h3 {
+            font-size: 11.5pt;
+            color: var(--indigo-accent);
+            margin-top: 20px;
+            margin-bottom: 10px;
+            page-break-after: avoid;
+        }
+
+        p {
+            margin: 0 0 15px 0;
+            text-align: justify;
+        }
+
+        ul,
+        ol {
+            margin: 0 0 20px 0;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 9.5pt;
+            page-break-inside: avoid;
+            background-color: rgba(15, 23, 42, 0.4);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: var(--bg-panel);
+            color: var(--text-primary);
+            font-weight: 600;
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: #cbd5e1;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: rgba(30, 41, 59, 0.5);
+            color: #f472b6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9pt;
+        }
+
+        pre {
+            background-color: #090d1a;
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 12px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 9pt;
+            color: #e2e8f0;
+            margin: 20px 0;
+            overflow-x: auto;
+            white-space: pre;
+            page-break-inside: avoid;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 7.5pt;
+            font-weight: 700;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-indigo {
+            background-color: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .badge-purple {
+            background-color: rgba(168, 85, 247, 0.15);
+            color: #d8b4fe;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .badge-rose {
+            background-color: rgba(244, 63, 94, 0.15);
+            color: #fca5a5;
+            border: 1px solid rgba(244, 63, 94, 0.3);
+        }
+
+        .badge-emerald {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .bold {
+            font-weight: 700;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header-banner">
+        <h1>SWB Remote Pivot Engine (v3.0)</h1>
+        <div class="subtitle">Secure Role-Based Access Control & Dual-Sided Trust Architecture</div>
+        <div class="meta-grid">
+            <div><span class="bold">Environment:</span> Google Antigravity IDE</div>
+            <div><span class="bold">Cognitive Layer:</span> Native Gemini Pro Engine</div>
+            <div style="text-align: right;"><span class="bold">Status:</span> Production Solo Specification</div>
+        </div>
+    </div>
+
+    <h2>1. Hackathon Paradigm Alignment & Core Purpose</h2>
+    <p>
+        The <span class="bold">SWB Remote Pivot Engine v3.0</span> is engineered explicitly to align with the core
+        objective of the Scale Without Borders AI Hackathon: identifying high-quality, legitimate remote employment
+        paths in tech while shielding immigrant talents from malicious market vulnerabilities. By combining strict
+        identity verification with advanced, deterministic audit checking, the platform prevents fraud at the entry
+        layer and accelerates technical integration.
+    </p>
+
+    <h2>2. Cryptographic Role-Based Access Control (RBAC) Specification</h2>
+    <p>
+        The system enforces an absolute system-level access boundary. Loose, shifting frontend client switches are
+        entirely deprecated in favor of explicit state containers. Users must verify their profiles via simulated
+        authentication handshakes before accessing specialized workspace actions.
+    </p>
+
+    <h3>2.1 State-Transition Model</h3>
+    <p>The system operates on three strict enumerated configuration spaces:</p>
+    <ul>
+        <li><span class="bold">`UNASSIGNED`</span>: The initial application gateway view container. Completely wraps and
+            hides underlying processing pipelines. Restricts interaction to verified identity validation cards.</li>
+        <li><span class="bold">`ROLE_JOB_SEEKER`</span>: Authorized upon simulated Google or LinkedIn federated
+            authentication. Unlocks resume optimization arrays, industry keyword targeting engines, and download loops
+            for copyable code delivery blueprints.</li>
+        <li><span class="bold">`ROLE_JOB_POSTER`</span>: Authorized upon validating an enterprise corporate email
+            address. Grants permission to execute corporate infrastructure scoring routines, startup runway evaluation
+            audits, and remote-readiness verification checks.</li>
+    </ul>
+
+    <h2>3. Recruiter/Poster Integrity & Validation Framework</h2>
+    <p>
+        When an authenticated entity with <span class="bold">`ROLE_JOB_POSTER`</span> attempts to submit an opportunity,
+        the payload passes through a strict deterministic and heuristic grading matrix to generate an aggregate <span
+            class="bold">Legitimacy Score (0–100%)</span>.
+    </p>
+
+    <h3>3.1 The Legitimacy Logic Matrix</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 30%;">Verification Directive</th>
+                <th style="width: 20%;">Scoring Allocation</th>
+                <th style="width: 50%;">Automated Compliance Rule Mechanics</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="bold">Domain Integrity Handshake</td>
+                <td><span class="badge badge-indigo">+20 Score Points</span></td>
+                <td>Automated alignment evaluation: Extract email suffix and verify it matches the root domain of the
+                    corporate website.</td>
+            </tr>
+            <tr>
+                <td class="bold">Careers Portal Alignment</td>
+                <td><span class="badge badge-indigo">+25 Score Points</span></td>
+                <td>Validates that the specific opening is mirrored natively on the company’s official internal index
+                    paths, ensuring legitimacy.</td>
+            </tr>
+            <tr>
+                <td class="bold">Capital Runway Stability</td>
+                <td><span class="badge badge-indigo">+15 Score Points</span></td>
+                <td>For early-stage operations, checks available metadata to verify financial backing from institutional
+                    venture capital frameworks.</td>
+            </tr>
+            <tr>
+                <td class="bold">Public Email Spoof Intercept</td>
+                <td><span class="badge badge-rose">Forfeit to 0%</span></td>
+                <td>Circuit breaker: Instantly zero out total scoring if a public host (e.g., Gmail, Yahoo) claims
+                    corporate representation.</td>
+            </tr>
+            <tr>
+                <td class="bold">Financial Extortion Override</td>
+                <td><span class="badge badge-rose">Forfeit to 0%</span></td>
+                <td>Pattern matching safety switch: Triggers immediate isolation if text requests hardware deposits,
+                    registration fees, or training costs.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>3.2 Growth-Tier Classifications</h3>
+    <p>Organizational scale properties are evaluated strictly via numeric parameters to prevent data contradictions:</p>
+    <ol>
+        <li><span class="bold">Startup</span>: 1 to 99 employees. Enforces specialized evaluation of venture funding
+            variables (`fundingInfo`).</li>
+        <li><span class="bold">Mid-Market Enterprise</span>: 100 to 999 employees. Evaluated against verified mid-tier
+            operational footprints.</li>
+        <li><span class="bold">Large Enterprise / MNC</span>: 1,000+ employees. Assessed against global operational
+            multi-national delivery standards.</li>
+    </ol>
+
+    <h3>3.3 Rigid Borderless Remote-Only Enforcement Policy</h3>
+    <p>
+        To preserve alignment with the hackathon's core premise, the submission process blocks hybrid or localized
+        configurations. If the incoming payload parameters describe an on-site or hybrid setup, the interface intercepts
+        the call, blocks API network dispatching, and displays a strict theme-compliance validation error.
+    </p>
+
+    <h2>4. Unified API Ingestion Transport Interface</h2>
+    <p>
+        Data movement between the Antigravity frontend and the underlying Node.js server running on Port 3000 passes
+        through a highly structured payload exchange interface.
+    </p>
+
+    <h3>4.1 Endpoint Signature: <span class="bold">`POST /api/verify-job`</span></h3>
+    <p class="italic">Unified Request Ingest Payload Structure:</p>
+    <pre>{
+  "userRole": "JOB_SEEKER" | "JOB_POSTER",
+  "targetRole": "string",
+  "rawExperience": "string",
+  "companyMetadata": {
+    "companyName": "string",
+    "orgEmail": "string",
+    "orgWebsite": "string",
+    "careersPageUrl": "string",
+    "employeeCount": number,
+    "companyScale": "Startup" | "Mid-Market" | "Large Enterprise",
+    "fundingInfo": "string"
+  }
+}</pre>
+
+    <p class="italic">Unified Sync Response Contract (200 OK):</p>
+    <pre>{
+  "originalSkill": "string",
+  "translatedSkill": ["string"],
+  "corporateTrustMetrics": {
+    "legitimacyScore": number,
+    "scaleGroup": "string",
+    "fundingSecurity": "string",
+    "domainIntegrity": "string",
+    "careersPageConsistency": "string",
+    "trustSignals": ["string"],
+    "flags": ["string"]
+  },
+  "savedToDb": boolean
+}</pre>
+
+</body>
+
+</html>

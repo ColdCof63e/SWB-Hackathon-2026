@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { 
-  Shield, 
-  Briefcase, 
-  User, 
-  Mail, 
-  Globe, 
-  Building, 
-  CheckCircle, 
-  AlertTriangle, 
-  Copy, 
-  LogOut, 
-  Lock, 
-  Check, 
-  Loader2, 
-  Compass, 
+import {
+  Shield,
+  Briefcase,
+  User,
+  Mail,
+  Globe,
+  Building,
+  CheckCircle,
+  AlertTriangle,
+  Copy,
+  LogOut,
+  Lock,
+  Check,
+  Loader2,
+  Compass,
   Sparkles,
   ArrowRight,
   ShieldCheck,
@@ -22,6 +22,13 @@ import {
 
 // Strict Role RBAC Control
 export type Role = 'UNASSIGNED' | 'JOB_SEEKER' | 'JOB_POSTER';
+
+// session interface
+export interface UserSession {
+  isAuthenticated: boolean,
+  email: string,
+  provider: 'google' | 'linkedIn' | 'domain_handshake' | null
+}
 
 export interface CompanyMetadata {
   companyName: string;
@@ -45,6 +52,13 @@ export default function PivotDashboard() {
   const [role, setRole] = useState<Role>('UNASSIGNED');
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
+
+  // Active Session Tracking
+  const [activeSession, setActiveSession] = useState<UserSession>({
+    isAuthenticated: false,
+    email: '',
+    provider: null
+  })
 
   // Access Control Verification State
   const [corporateEmail, setCorporateEmail] = useState('');
@@ -256,7 +270,7 @@ export default function PivotDashboard() {
   const mockPosterResult = () => {
     const isGmail = recruiterEmail.includes('@gmail.com') || recruiterEmail.includes('@yahoo.com');
     const hasUpfrontFees = jobDescription.toLowerCase().includes('fee') || jobDescription.toLowerCase().includes('deposit') || jobDescription.toLowerCase().includes('payment');
-    
+
     let calculatedScore = 88;
     const flags = [];
     let domainVal = 'Pass';
@@ -306,7 +320,7 @@ export default function PivotDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col relative overflow-hidden">
-      
+
       {/* Premium Glow Accents */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-500/10 blur-[120px] pointer-events-none" />
@@ -381,7 +395,7 @@ export default function PivotDashboard() {
 
             {/* Grid layout for Roles */}
             <div className="grid md:grid-cols-3 gap-6">
-              
+
               {/* Card A: Google Auth (Job Seeker) */}
               <div className="glass-panel rounded-2xl p-6 flex flex-col justify-between hover-glow transition-all duration-300 group">
                 <div>
@@ -484,7 +498,7 @@ export default function PivotDashboard() {
         {/* 2. JOB SEEKER WORKSPACE */}
         {role === 'JOB_SEEKER' && (
           <div className="grid lg:grid-cols-12 gap-8 items-start">
-            
+
             {/* Left Panel: Ingest Form */}
             <div className="lg:col-span-5 glass-panel rounded-2xl p-6 shadow-xl relative overflow-hidden">
               <div className="flex items-center space-x-2.5 mb-6 pb-4 border-b border-slate-800/80">
@@ -560,7 +574,7 @@ export default function PivotDashboard() {
 
             {/* Right Panel: Workspace Display */}
             <div className="lg:col-span-7 space-y-6">
-              
+
               {!seekerResults && !loading && (
                 <div className="glass-panel rounded-2xl p-12 text-center border-dashed border-slate-700 flex flex-col items-center justify-center h-full min-h-[450px]">
                   <Compass className="h-12 w-12 text-slate-600 mb-4 animate-pulse" />
@@ -585,7 +599,7 @@ export default function PivotDashboard() {
 
               {seekerResults && !loading && (
                 <div className="space-y-6 animate-fadeIn">
-                  
+
                   {/* Optimized Bullet Points */}
                   <div className="glass-panel rounded-2xl p-6 shadow-lg">
                     <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-4 flex items-center space-x-2">
@@ -656,7 +670,7 @@ export default function PivotDashboard() {
         {/* 3. JOB POSTER / RECRUITER WORKSPACE */}
         {role === 'JOB_POSTER' && (
           <div className="grid lg:grid-cols-12 gap-8 items-start relative">
-            
+
             {/* Compliance Alerts Modal Overlays */}
             {showRemoteAlert && (
               <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -837,7 +851,7 @@ export default function PivotDashboard() {
 
             {/* Right Panel: Analytics Dashboard */}
             <div className="lg:col-span-6 space-y-6">
-              
+
               {!posterResults && !loading && (
                 <div className="glass-panel rounded-2xl p-12 text-center border-dashed border-slate-700 flex flex-col items-center justify-center h-full min-h-[450px]">
                   <Shield className="h-12 w-12 text-slate-600 mb-4 animate-pulse" />
@@ -860,7 +874,7 @@ export default function PivotDashboard() {
 
               {posterResults && !loading && (
                 <div className="space-y-6 animate-fadeIn">
-                  
+
                   {/* Trust Score & Grid Panel */}
                   <div className="glass-panel rounded-2xl p-6 shadow-lg">
                     <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-6">
@@ -868,7 +882,7 @@ export default function PivotDashboard() {
                     </h4>
 
                     <div className="grid sm:grid-cols-12 gap-6 items-center">
-                      
+
                       {/* SVG circular score meter */}
                       <div className="sm:col-span-5 flex flex-col items-center justify-center relative py-2">
                         <svg className="w-32 h-32 transform -rotate-90">
@@ -928,22 +942,21 @@ export default function PivotDashboard() {
                       <ShieldCheck className="h-4.5 w-4.5 text-indigo-400" />
                       <span>Security & Safety Flag Dashboard</span>
                     </h4>
-                    
+
                     <div className="space-y-3">
                       {posterResults.safetyFlags.map((flag, idx) => {
                         const isCritical = flag.includes('CRITICAL');
                         const isWarning = flag.includes('Warning');
-                        
+
                         return (
-                          <div 
-                            key={idx} 
-                            className={`p-3.5 rounded-xl border flex items-start space-x-3 text-xs leading-relaxed ${
-                              isCritical 
-                                ? 'bg-red-500/10 border-red-500/20 text-red-200' 
-                                : isWarning 
-                                  ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-200' 
-                                  : 'bg-green-500/10 border-green-500/20 text-green-200'
-                            }`}
+                          <div
+                            key={idx}
+                            className={`p-3.5 rounded-xl border flex items-start space-x-3 text-xs leading-relaxed ${isCritical
+                              ? 'bg-red-500/10 border-red-500/20 text-red-200'
+                              : isWarning
+                                ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-200'
+                                : 'bg-green-500/10 border-green-500/20 text-green-200'
+                              }`}
                           >
                             {isCritical ? (
                               <AlertTriangle className="h-4.5 w-4.5 text-red-400 shrink-0 mt-0.5" />
